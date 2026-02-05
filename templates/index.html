@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chemical Price Filler</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .upload-section {
+            margin-bottom: 25px;
+        }
+        
+        .upload-box {
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .upload-box:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+        
+        .upload-box.active {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        
+        .upload-text {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .file-name {
+            margin-top: 10px;
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        .mode-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .mode-title {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .radio-option {
+            flex: 1;
+            position: relative;
+        }
+        
+        .radio-option input[type="radio"] {
+            display: none;
+        }
+        
+        .radio-label {
+            display: block;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .radio-option input[type="radio"]:checked + .radio-label {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+        
+        .process-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .process-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .process-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .download-btn {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Chemical Price Filler</h1>
+        <p class="subtitle">Upload your files and fill prices automatically</p>
+        
+        <form id="uploadForm">
+            <!-- PDF Upload -->
+            <div class="upload-section">
+                <div class="upload-box" id="pdfBox">
+                    <div class="upload-icon">📄</div>
+                    <div class="upload-text">Click to upload PDF Price List</div>
+                    <div class="file-name" id="pdfName"></div>
+                </div>
+                <input type="file" id="pdfFile" accept=".pdf" required>
+            </div>
+            
+            <!-- Excel Upload -->
+            <div class="upload-section">
+                <div class="upload-box" id="excelBox">
+                    <div class="upload-icon">📊</div>
+                    <div class="upload-text">Click to upload Excel File</div>
+                    <div class="file-name" id="excelName"></div>
+                </div>
+                <input type="file" id="excelFile" accept=".xlsx" required>
+            </div>
+            
+            <!-- Price Mode -->
+            <div class="mode-section">
+                <div class="mode-title">Select Price Mode</div>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" id="minPrice" name="price_mode" value="min" checked>
+                        <label for="minPrice" class="radio-label">
+                            ⬇️ Minimum Price
+                        </label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="maxPrice" name="price_mode" value="max">
+                        <label for="maxPrice" class="radio-label">
+                            ⬆️ Maximum Price
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <button type="submit" class="process-btn" id="processBtn">
+                🚀 Fill Prices Now
+            </button>
+        </form>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 10px; color: #666;">Processing...</p>
+        </div>
+        
+        <div class="status" id="status"></div>
+    </div>
+    
+    <script>
+        // File upload handlers
+        document.getElementById('pdfBox').addEventListener('click', () => {
+            document.getElementById('pdfFile').click();
+        });
+        
+        document.getElementById('excelBox').addEventListener('click', () => {
+            document.getElementById('excelFile').click();
+        });
+        
+        document.getElementById('pdfFile').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('pdfName').textContent = '✓ ' + file.name;
+                document.getElementById('pdfBox').classList.add('active');
+            }
+        });
+        
+        document.getElementById('excelFile').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('excelName').textContent = '✓ ' + file.name;
+                document.getElementById('excelBox').classList.add('active');
+            }
+        });
+        
+        // Form submission
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            formData.append('pdf', document.getElementById('pdfFile').files[0]);
+            formData.append('excel', document.getElementById('excelFile').files[0]);
+            formData.append('price_mode', document.querySelector('input[name="price_mode"]:checked').value);
+            
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('processBtn').disabled = true;
+            document.getElementById('status').style.display = 'none';
+            
+            try {
+                const response = await fetch('/process', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                // Hide loading
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('processBtn').disabled = false;
+                
+                const statusDiv = document.getElementById('status');
+                statusDiv.style.display = 'block';
+                
+                if (result.success) {
+                    statusDiv.className = 'status success';
+                    let message = `✅ Success!<br>Matched: ${result.matched}<br>Unmatched: ${result.unmatched}`;
+                    
+                    if (result.unmatched > 0) {
+                        message += '<br><br>Unmatched products:<br>' + result.unmatched_list.slice(0, 5).join('<br>');
+                    }
+                    
+                    const filename = document.getElementById('excelFile').files[0].name;
+                    message += `<br><br><a href="/download/${filename}" class="download-btn">📥 Download Excel</a>`;
+                    
+                    statusDiv.innerHTML = message;
+                } else {
+                    statusDiv.className = 'status error';
+                    statusDiv.textContent = '❌ Error: ' + result.error;
+                }
+                
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('processBtn').disabled = false;
+                
+                const statusDiv = document.getElementById('status');
+                statusDiv.style.display = 'block';
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '❌ Error: ' + error.message;
+            }
+        });
+    </script>
+</body>
+</html>
